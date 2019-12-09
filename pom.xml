@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Maven POM  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.xnzn.graph</groupId>
+    <artifactId>graph</artifactId>
+
+    <packaging>pom</packaging>
+    <version>1.0.0</version>
+
+    <modules>
+        <module>base</module>
+        <module>website</module>
+    </modules>
+    <parent>
+        <!--SpringBoot的依赖,base,website都可以引用-->
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.1.5.RELEASE</version>
+    </parent>
+</project>

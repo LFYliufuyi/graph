@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xnzn.graph.base.mapper.LorePointGraphMapper">
+    <resultMap id="BaseResultMap" type="com.xnzn.graph.base.entity.LorePointGraph">
+        <id column="id"  property="id"/>
+        <result column="subject_id"  property="subjectId"/>
+        <result column="name"  property="name"/>
+        <result column="path"  property="path"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="index" property="index"/>
+        <result column="rotate" property="rotate"/>
+        <result column="accuracy" property="accuracy"/>
+        <association property="parentAbsoluteDelta" javaType="com.xnzn.graph.base.entity.Point">
+            <result column="parent_absolute_delta_x" property="x"/>
+            <result column="parent_absolute_delta_y" property="y"/>
+        </association>
+        <association property="parentAbsoluteCorner" javaType="com.xnzn.graph.base.entity.Point">
+            <result column="parent_absolute_corner_x" property="x"/>
+            <result column="parent_absolute_corner_y" property="y"/>
+        </association>
+        <association property="delta" javaType="com.xnzn.graph.base.entity.Point">
+            <result column="delta_x" property="x"/>
+            <result column="delta_y" property="y"/>
+        </association>
+        <association property="corner" javaType="com.xnzn.graph.base.entity.Point">
+            <result column="corner_x" property="x"/>
+            <result column="corner_y" property="y"/>
+        </association>
+        <association property="absoluteDelta" javaType="com.xnzn.graph.base.entity.Point">
+            <result column="absolute_delta_x" property="x"/>
+            <result column="absolute_delta_y" property="y"/>
+        </association>
+        <association property="absoluteCorner" javaType="com.xnzn.graph.base.entity.Point">
+            <result column="absolute_corner_x" property="x"/>
+            <result column="absolute_corner_y" property="y"/>
+        </association>
+    </resultMap>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        delete from t_lore
+        where id in (select id from (
+                      select t1.id,
+                      if(find_in_set(parent_id, @pids) > 0, @pids := concat(@pids, ',', id), 0) as ischild
+                      from (
+                           select id,parent_id from t_lore t where t.subject_id = 1
+                          ) t1,
+                          (select @pids := #{id}) t2
+                     ) t3 where ischild != 0
+        ) or id = #{id}
+  </delete>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into t_lore
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="subjectId!=null">
+                subject_id,
+            </if>
+            <if test="name!=null">
+                `name`,
+            </if>
+            <if test="path!=null">
+                path,
+            </if>
+            <if test="parentId!=null">
+                parent_id,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="subjectId!=null">
+                #{subjectId},
+            </if>
+            <if test="name!=null">
+                #{name},
+            </if>
+            <if test="path!=null">
+                #{path},
+            </if>
+            <if test="parentId!=null">
+                #{parentId},
+            </if>
+        </trim>
+    </insert>
+
+
+    <update id="updateByPrimaryKey">
+        update t_lore
+        <set>
+            <!--<if test="subjectId != null">
+                subject_id = #{subjectId},
+            </if>-->
+            <if test="name != null">
+                `name` = #{name},
+            </if>
+            <!--<if test="path != null">
+                path = #{path},
+            </if>-->
+            <if test="delta != null">
+                delta_x = #{delta.x},
+            </if>
+            <if test="delta != null">
+                delta_y = #{delta.y},
+            </if>
+            <if test="corner != null">
+                corner_x = #{corner.x},
+            </if>
+            <if test="corner != null">
+                corner_y = #{corner.y},
+            </if>
+            <if test="absoluteDelta != null">
+                absolute_delta_x = #{absoluteDelta.x},
+            </if>
+            <if test="absoluteDelta != null">
+                absolute_delta_y = #{absoluteDelta.y},
+            </if>
+            <if test="absoluteCorner != null">
+                absolute_corner_x = #{absoluteCorner.x},
+            </if>
+            <if test="absoluteCorner != null">
+                absolute_corner_y = #{absoluteCorner.y},
+            </if>
+            <if test="index != null">
+                `index` = #{index},
+            </if>
+            <if test="rotate != null">
+                rotate = #{rotate},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+<!--    update t_student_test_problem-->
+<!--    <trim prefix="set" suffixOverrides=",">-->
+<!--        <trim prefix="get_fraction = case" suffix="end,">-->
+<!--            <foreach collection="list" item="i" index="index">-->
+<!--                <if test="i.getFraction != null">-->
+<!--                    when id=#{i.studentTestProblemId} then #{i.getFraction}-->
+<!--                </if>-->
+<!--            </foreach>-->
+<!--        </trim>-->
+<!--        <trim prefix="is_true = case" suffix="end,">-->
+<!--            <foreach collection="list" item="i" index="index">-->
+<!--                <if test="i.isTrue != null">-->
+<!--                    when id=#{i.studentTestProblemId} then #{i.isTrue}-->
+<!--                </if>-->
+<!--            </foreach>-->
+<!--        </trim>-->
+<!--    </trim>-->
+<!--    where-->
+<!--    <foreach collection="list" separator="or" item="i" index="index">-->
+<!--        id = #{i.studentTestProblemId}-->
+<!--    </foreach>-->
+    <update id="updatePointGraphList">
+        update t_lore
+        <trim prefix="set">
+            <foreach collection="list" item="i" separator=",">
+
+            </foreach>
+        </trim>
+
+    </update>
+
+    <select id="selectBySubjectId" resultMap="BaseResultMap">
+    select id, subject_id, `name`, path, parent_id,corner_x,corner_y,delta_x,delta_y,`index`,rotate
+    from t_lore
+    where subject_id = #{subjectId} and is_custom = 0
+    order by path
+  </select>
+
+    <select id="selectTiledBySubjectId" resultMap="BaseResultMap">
+        select ol.id, ol.subject_id, ol.`name`, ol.path, ol.accuracy,ol.parent_id,ol.absolute_corner_x,ol.absolute_corner_y,ol.absolute_delta_x,ol.absolute_delta_y,ol.`index`,ol.rotate,
+				ifnull(pl.absolute_delta_x,0) parent_absolute_delta_x,ifnull(pl.absolute_delta_y,0) parent_absolute_delta_y
+        from t_lore ol
+        left join t_lore pl on ol.parent_id = pl.id
+        where ol.subject_id = #{subjectId} and ol.is_custom = 0
+        order by `index`
+    </select>
+
+    <select id="selectByPath" resultMap="BaseResultMap">
+        select ol.id, ol.subject_id, ol.`name`, ol.path, ol.parent_id,ol.absolute_corner_x,ol.absolute_corner_y,ol.absolute_delta_x,ol.absolute_delta_y,ol.`index`,ol.rotate
+        from t_lore ol
+        where ol.path like #{path}"%" and ol.path != #{path}
+    </select>
+
+    <select id="selectLastPathBySubjectId" resultType="java.lang.String">
+        select path
+        from t_lore
+        where subject_id = #{subjectId} and parent_id = 0
+        order by id desc
+        limit 1
+    </select>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        select ol.id, ol.subject_id, ol.`name`, ol.path, ol.parent_id,ol.corner_x,ol.corner_y,ol.delta_x,ol.delta_y,ol.`index`,ol.rotate,
+		        ifnull(pl.absolute_delta_x,0) parent_absolute_delta_x,ifnull(pl.absolute_delta_y,0) parent_absolute_delta_y,
+		        ifnull(pl.absolute_corner_x,0) parent_absolute_corner_x,ifnull(pl.absolute_corner_y,0) parent_absolute_corner_y
+        from t_lore ol
+        left join t_lore pl on ol.parent_id = pl.id
+        where ol.id = #{id}
+    </select>
+
+    <select id="queryTestAccuary" resultType="com.xnzn.graph.base.entity.MyLore">
+        select l.id,l.`name`,l.path,l.parent_id parentId,l.is_custom isCustom,count(case when stp.is_true = 1 then stp.is_true else null end) `trueCount`,count(l.id) `total`,
+				round(count(case when stp.is_true = 1 then stp.is_true else null end)/count(l.id)*100,1) avgAccuracy
+        from t_student_test st
+        inner join t_student_test_problem stp on stp.student_test_id = st.id
+        inner join t_test t on st.test_id = t.id
+        inner join t_test_volumes tv on t.test_volume_id = tv.id
+        inner join t_test_volumes_problem tvp on tvp.test_volumes_problem_id = stp.test_volumes_problem_id and tvp.test_volume_id = tv.id
+        inner join t_test_volumes_problem_lore tvpl on tvp.test_volumes_problem_id = tvpl.test_volumes_problem_id and tvpl.test_volumes_id = tv.id
+        inner join t_lore l on tvpl.lore_id = l.id
+        where st.student_id = #{studentId} and st.subject_id = #{subjectId}
+        group by l.id
+        order by path
+    </select>
+
+    <select id="queryTestAccuaryForList" resultType="com.xnzn.graph.base.entity.MyLore">
+        select l.id,l.`name`,l.path,l.parent_id parentId,l.is_custom isCustom
+        from t_lore l
+        where l.id in
+        <foreach collection="list" item="i" separator="," open="(" close=")">
+            #{i.parentId}
+        </foreach>
+    </select>
+
+</mapper>
